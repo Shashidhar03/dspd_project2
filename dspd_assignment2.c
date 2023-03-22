@@ -11,8 +11,8 @@ struct restaurant_Node
 	char menu[5][100];
 	char type_of_restarunt[100];
 	char type_of_food[100];
-	struct restaurant_Node* rest_next;
     char near_by_area[3][100];
+	struct restaurant_Node* rest_next;
 };
 
 struct agent_Node
@@ -56,7 +56,7 @@ typedef struct agent_Node agent_node;
 typedef struct user_Node user_node;
 typedef struct global_order_Node global_order_node;
 typedef struct global_order_Que global_que;
-typedef struct agent_order_Node agent_order_node;
+
 
 rest_node* insert_rest_node(rest_node* lptr)
 {
@@ -167,10 +167,10 @@ agent_node* insert_agent_node(agent_node* lptr)
     return lptr;
 }
 
-void visit_agent_node(agent_node* nptr)
+void visit_agent_node(agent_node* nptr, agent_node* last)                  //q8
 {
 	int i=1;
-	while(nptr!=NULL)
+	while(nptr!=last)
 	{
 		printf("\n agent S.NO : %d\n",i);
 		printf("agent id : %d\n",nptr->agent_id);
@@ -181,6 +181,12 @@ void visit_agent_node(agent_node* nptr)
 		nptr=nptr->agent_next;
 		i++;
 	}
+    printf("\n agent S.NO : %d\n",i);
+		printf("agent id : %d\n",last->agent_id);
+		printf("agent name : %s\n",last->agent_name);
+		printf("agent phone number : %llu\n",last->agent_phone_no);
+		printf("agent current commision : %d\n",last->commission);
+        printf("agent area %s\n",last->agent_area);
 }
 
 user_node* insert_user_node(user_node *lptr)
@@ -231,7 +237,7 @@ void initilise(global_que *que)
     que->rear=NULL;
 }
 
-void place_order(global_que *que, agent_node* lptr)
+void place_order(global_que *que, agent_node* lptr)                    //q2
 {
     char line[1024];
     char *sp;
@@ -280,7 +286,7 @@ void place_order(global_que *que, agent_node* lptr)
     fclose(fp);
 }
 
-void visit_order_que(global_que *que)
+void visit_order_que(global_que *que)                               //q9
 {
     global_order_node *ptr;
     ptr=que->front;
@@ -320,7 +326,7 @@ void search_area_specific(rest_node *nptr, char str[])
 }
 
 
-void search_on_category(rest_node* nptr, char to_search[])
+void search_on_category(rest_node* nptr, char to_search[])                       //q1
 {
     rest_node *ptr=nptr;
     while(nptr!=NULL)
@@ -370,11 +376,11 @@ void search_on_category(rest_node* nptr, char to_search[])
     }
 }
 
-void delivery(global_que *que)
+void delivery(global_que *que)                                     //q3
 {
-    int x=que->front->agent_order_next->commission;
+    int x=que->front->agent_order_next->commission;             //storing previous comission
 
-    que->front->agent_order_next->commission=(que->front->agent_order_next->commission)*(1.1);
+    que->front->agent_order_next->commission=(x)*(1.1);           //increasing comission
 
     global_order_node *ptr;
     ptr=que->front;
@@ -398,7 +404,7 @@ void delivery(global_que *que)
     ptr=NULL;
 }
 
-void cancel_order(global_que *que)
+void cancel_order(global_que *que)                                           //q4
 {
     global_order_node *ptr;
     ptr=que->front;
@@ -411,7 +417,7 @@ void cancel_order(global_que *que)
     ptr=NULL;
 }
 
-void find_favorite_foods_of_user(int to_find, global_que* que)
+void find_favorite_foods_of_user(int to_find, global_que* que)                      //q5
 {
     char str[10][100];
     FILE* fp=fopen("menu.csv","r");
@@ -489,7 +495,7 @@ void find_favorite_foods_of_user(int to_find, global_que* que)
    
 }
 
-void find_favorite_restaurants(rest_node *lptr)
+void find_favorite_restaurants(rest_node *lptr)                      //q6
 {
     char str[10][100];
     FILE* fp=fopen("restaturant_area.csv","r");
@@ -549,7 +555,7 @@ void find_favorite_restaurants(rest_node *lptr)
 
 }
 
-void find_favorite_foods_across_restaurants(global_que* que)
+void find_favorite_foods_across_restaurants(global_que* que)                       //q7
 {
     char str[10][100];
     FILE* fp=fopen("menu.csv","r");
@@ -614,7 +620,7 @@ void find_favorite_foods_across_restaurants(global_que* que)
     }
 }
 
-void restaurant_details(rest_node* nptr, char name[], char add[])
+void restaurant_details(rest_node* nptr, char name[], char add[])                  //q10
 {
     while(nptr!=NULL)
     {
@@ -641,7 +647,7 @@ void restaurant_details(rest_node* nptr, char name[], char add[])
     }
 }
 
-void area_wise_agents(agent_node* nptr)
+void area_wise_agents(agent_node* nptr)                               //q11
 {
     while(nptr!=NULL)
     {
@@ -657,8 +663,16 @@ int main()
 	//visit_rest_node(rest_ptr);       //printing all restaurants
 
     agent_node *agent_ptr=NULL;
+    agent_node *agent_last_ptr=NULL,*ptr;
     agent_ptr=insert_agent_node(agent_ptr);
-    //visit_agent_node(agent_ptr);    //printing all agents list
+    ptr=agent_ptr;
+    while(ptr->agent_next!=NULL)
+    {
+        ptr=ptr->agent_next;
+    }
+    agent_last_ptr=ptr;
+    agent_last_ptr->agent_next=agent_ptr;
+    //visit_agent_node(agent_ptr,agent_last_ptr);    //printing all agents list
 
     user_node *user_ptr=NULL;
     user_ptr=insert_user_node(user_ptr);
@@ -668,6 +682,8 @@ int main()
     global_que qeue;
     initilise(&qeue);
     place_order(&qeue,agent_ptr);
+
+    //visit_order_que(&qeue);
 
     int match;
     printf("select any number to do\n");               //1 q
@@ -689,7 +705,7 @@ int main()
         int sub_match;
         printf("select more options for  felixibility\n");
         printf("1.Based on category (restaurant, cafe, pub etc) \n");
-        printf("2.Based on category of food or cuisine (north Indian, south Indian, continental etc)\n");
+        printf("2.Based on category of food or cuisine (northIndian, southIndian, continental etc)\n");
         printf("3.Based on area (Name of area and its nearby areas)\n");
         scanf("%d",&sub_match);
         char to_search[100];
@@ -745,7 +761,7 @@ int main()
     }
     else if(match==8)
     {
-        visit_agent_node(agent_ptr);
+        visit_agent_node(agent_ptr,agent_last_ptr);
     }
     else if(match==9)
     {
@@ -768,5 +784,6 @@ int main()
     {
         printf("sucessfully exited\n");
     }
+    
 	return 0;
 }
